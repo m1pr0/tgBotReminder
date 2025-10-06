@@ -38,7 +38,25 @@ def send_welcome(message):
 
 @bot.message_handler(content_types=['text'])
 def working(message):
+
+    username = message.from_user.username
+
     if message.text == "записать новый дедлайн":
+        msg = bot.send_message(message.chat.id, "введите задание и дедлайн в следуюхем формате: задание|дедлайн")
+        bot.register_next_step_handler(msg, before_create, username)
+
+
+
+
+
+
+def before_create(message, user):
+    task = message.text.split("|")[0]
+    deadline = message.text.split("|")[1]
+    FFT.CreateTask(task, deadline, user)
+
+
+
 
 
 
