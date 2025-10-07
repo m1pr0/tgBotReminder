@@ -1,3 +1,4 @@
+import sqlite3
 from DB import funcForTasks as FFT
 
 
@@ -14,15 +15,22 @@ def before_create(message, user):
 
         task = message.text.split("|")[0].strip()
         deadline = message.text.split("|")[1].strip()
-
-        if "|" not in message:
-            return "вы не правильно ввели задание и дедлайе, используйте: задание|деддайн"
-
-        elif task != "" and deadline != "":
-            return "вы не ввели ничего(("
-
-        else:
-            FFT.CreateTask(task, deadline, user)
+        FFT.CreateTask(task, deadline, user)
 
     except Exception as e:
-        return f"ошибка: {str(e)}"
+        print(f"ошибка: {str(e)}")
+
+
+
+# функция для подсчета количества записей в таблице tasks по пользователю
+def tasks_count(username):
+    with sqlite3.connect('my_database.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM tasks WHERE user = ?', (username,))
+        return cursor.fetchone()[0]
+
+
+
+
+#def test_def(message, us):
+#    print(message.text[0], us)

@@ -1,2 +1,2 @@
 from .database import createDatabase
-import funcForTasks
+from . import funcForTasks

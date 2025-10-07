@@ -46,6 +46,9 @@ def working(message):
         msg = bot.send_message(message.chat.id, "введите задание и дедлайн в следуюхем формате: задание|дедлайн")
         bot.register_next_step_handler(msg, before_create, username)
 
+    elif message.text == "посмотреть мои дедлайны":
+
+
 
 
 

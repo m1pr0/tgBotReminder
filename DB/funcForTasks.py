@@ -29,6 +29,13 @@ def CreateTask(text, deadline, user):
 
 
 
+def wath_tasks(task_number, user):
+    connection = sqlite3.connect('my_database.db')
+    cursor = connection.cursor()
+
+
+
+
 def UpdateTask(task_id, text=None, deadline=None, user=None):
     connection = sqlite3.connect('my_database.db')
     cursor = connection.cursor()
