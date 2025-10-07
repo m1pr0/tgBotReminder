@@ -3,6 +3,7 @@ import telebot
 from telebot import types
 from DB import createDatabase
 from DB import funcForTasks as FFT
+from suportFuncs import before_create
 
 createDatabase()
 
@@ -50,10 +51,7 @@ def working(message):
 
 
 
-def before_create(message, user):
-    task = message.text.split("|")[0]
-    deadline = message.text.split("|")[1]
-    FFT.CreateTask(task, deadline, user)
+
 
 
 
