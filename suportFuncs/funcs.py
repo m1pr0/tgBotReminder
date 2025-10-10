@@ -1,4 +1,8 @@
+import telebot
 import sqlite3
+
+
+
 from DB import funcForTasks as FFT
 
 
@@ -32,5 +36,14 @@ def tasks_count(username):
 
 
 
-#def test_def(message, us):
-#    print(message.text[0], us)
+#функция нужна для вывода данных, которые возвращает wath_tasks
+def show_tasks(task_number, user, chat_id, bot):
+
+    tasks = FFT.wath_tasks(task_number, user)
+
+    for task in tasks:
+        bot.send_message(chat_id, f"{task['id']}: {task['text']} (до {task['deadline']})")
+
+
+
+

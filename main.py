@@ -3,7 +3,7 @@ import telebot
 from telebot import types
 from DB import createDatabase
 from DB import funcForTasks as FFT
-from suportFuncs import before_create
+from suportFuncs import before_create, show_tasks
 
 createDatabase()
 
@@ -41,13 +41,15 @@ def send_welcome(message):
 def working(message):
 
     username = message.from_user.username
+    chat_id = message.chat.id
 
     if message.text == "записать новый дедлайн":
         msg = bot.send_message(message.chat.id, "введите задание и дедлайн в следуюхем формате: задание|дедлайн")
         bot.register_next_step_handler(msg, before_create, username)
 
     elif message.text == "посмотреть мои дедлайны":
-
+        msg = bot.send_message(message.chat.id, "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
+        bot.register_next_step_handler(msg, show_tasks(), username, chat_id, bot)
 
 
 

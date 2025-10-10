@@ -29,9 +29,22 @@ def CreateTask(text, deadline, user):
 
 
 
-def wath_tasks(task_number, user):
+def wath_tasks(task_number="все", user=None):
     connection = sqlite3.connect('my_database.db')
     cursor = connection.cursor()
+
+    if task_number == "все":
+        cursor.execute('SELECT * FROM tasks WHERE user = ? ORDER BY id', (user,))
+    else:
+        cursor.execute('SELECT * FROM tasks WHERE id = ? AND user = ?', (task_number, user))
+
+    tasks = cursor.fetchall()
+
+    # Преобразуем в список словарей для удобства
+    columns = [desc[0] for desc in cursor.description]
+    result = [dict(zip(columns, task)) for task in tasks]
+
+    return result
 
 
 
