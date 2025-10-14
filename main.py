@@ -49,7 +49,11 @@ def working(message):
 
     elif message.text == "посмотреть мои дедлайны":
         msg = bot.send_message(message.chat.id, "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
-        bot.register_next_step_handler(msg, show_tasks(), username, chat_id, bot)
+        bot.register_next_step_handler(msg, show_tasks, username, chat_id, bot)
+
+    elif message.text == "удалить дедлайн":
+        msg = bot.send_message(message.chat.id, "введите номер задачи, которую нужно удалить")
+        bot.register_next_step_handler(msg, FFT.CompletedTask, username)
 
 
 

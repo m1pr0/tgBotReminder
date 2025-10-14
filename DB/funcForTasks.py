@@ -86,7 +86,10 @@ def UpdateTask(task_id, text=None, deadline=None, user=None):
 
 
 
-def CompletedTask(task_id=None, text="задача была удалена или выполнена", deadline=datetime.datetime.now(), user=None):
+def CompletedTask(task_id=None, user=None):
+    text = "задача была удалена или выполнена"
+    deadline = datetime.datetime.now()
+
     connection = sqlite3.connect('my_database.db')
     cursor = connection.cursor()
 

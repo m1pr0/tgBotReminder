@@ -42,6 +42,7 @@ def show_tasks(task_number, user, chat_id, bot):
     tasks = FFT.wath_tasks(task_number, user)
 
     for task in tasks:
+        # нужно прописать логику, которая не даст вывести удаленную задачу
         bot.send_message(chat_id, f"{task['id']}: {task['text']} (до {task['deadline']})")
 
 
