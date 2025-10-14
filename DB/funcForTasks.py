@@ -86,7 +86,8 @@ def UpdateTask(task_id, text=None, deadline=None, user=None):
 
 
 
-def CompletedTask(task_id=None, user=None):
+def CompletedTask(message, user=None):
+    task_id = int(message.text.strip())
     text = "задача была удалена или выполнена"
     deadline = datetime.datetime.now()
 
