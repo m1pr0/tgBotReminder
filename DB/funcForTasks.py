@@ -35,6 +35,8 @@ def CreateTask(text, deadline, user):
         if connection:
             connection.close()
 
+
+
 def wath_tasks(task_number="все", user=None):
     connection = None
     try:
@@ -60,6 +62,7 @@ def wath_tasks(task_number="все", user=None):
     finally:
         if connection:
             connection.close()
+
 
 
 def UpdateTask(task_id, text=None, deadline=None, user=None):
