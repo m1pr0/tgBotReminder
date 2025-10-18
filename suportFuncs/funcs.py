@@ -2,19 +2,12 @@ import telebot
 import sqlite3
 import datetime
 
-
 from DB import funcForTasks as FFT
 
 
-
-
-
-
-
-#функция нужна в молмент создания задания для обработки сообщения пользователя
+# функция нужна в молмент создания задания для обработки сообщения пользователя
 # (вся информация передана в одном сообщении) и использования  register_next_step_handler
 def before_create(message, user):
-
     try:
 
         task = message.text.split("|")[0].strip()
@@ -25,7 +18,6 @@ def before_create(message, user):
         print(f"ошибка: {str(e)}")
 
 
-
 # функция для подсчета количества записей в таблице tasks по пользователю
 def tasks_count(username):
     with sqlite3.connect('my_database.db') as conn:
@@ -34,9 +26,7 @@ def tasks_count(username):
         return cursor.fetchone()[0]
 
 
-
-
-#функция нужна для вывода данных, которые возвращает wath_tasks
+# функция нужна для вывода данных, которые возвращает wath_tasks
 def show_tasks(message, user, chat_id, bot):
     task_number = message.text.strip()
 
@@ -57,9 +47,6 @@ def show_tasks(message, user, chat_id, bot):
     for task in tasks:
         bot.send_message(chat_id, f"{task['id']}: {task['text']} (до {task['deadline']})")
 
-
-
-
-#просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
-def botMes(bot, chat_id, message):
-    bot.send_message(chat_id, str(datetime.datetime.now()) + ',' * message)
+# просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
+# def botMes(bot, chat_id, message):
+#     bot.send_message(chat_id, str(datetime.datetime.now()) + ',' * message)

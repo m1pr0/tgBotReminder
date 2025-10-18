@@ -7,23 +7,13 @@ from suportFuncs import before_create, show_tasks
 
 createDatabase()
 
-
-
-
-
-
-
-
-
 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 item1 = types.KeyboardButton("записать новый дедлайн")
 item2 = types.KeyboardButton("посмотреть мои дедлайны")
-item3 = types.KeyboardButton("удалить дедлайн")
+item3 = types.KeyboardButton("завершить дедлайн")
+item4 = types.KeyboardButton("завершенные")
 
-markup.add(item1, item2, item3)
-
-
-
+markup.add(item1, item2, item3, item4)
 
 API_TOKEN = TOKEN
 
@@ -36,10 +26,8 @@ def send_welcome(message):
     bot.send_message(message.chat.id, 'салам погнали', parse_mode='html', reply_markup=markup)
 
 
-
 @bot.message_handler(content_types=['text'])
 def working(message):
-
     username = message.from_user.username
     chat_id = message.chat.id
 
@@ -48,20 +36,18 @@ def working(message):
         bot.register_next_step_handler(msg, before_create, username)
 
     elif message.text == "посмотреть мои дедлайны":
-        msg = bot.send_message(message.chat.id, "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
+        msg = bot.send_message(message.chat.id,
+                               "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
         bot.register_next_step_handler(msg, show_tasks, username, chat_id, bot)
 
-    elif message.text == "удалить дедлайн":
-        msg = bot.send_message(message.chat.id, "введите номер задачи, которую нужно удалить")
+    elif message.text == "завершить дедлайн":
+        msg = bot.send_message(message.chat.id, "введите номер задачи, которую нужно завершить")
         bot.register_next_step_handler(msg, FFT.CompletedTask, username)
 
-
-
-
-
-
-
-
+    elif message.text == "завершенные":
+        comTasks = FFT.CompletedTask()
+        for task in comTasks:
+            bot.send_message(message.chat.id, task)
 
 
 

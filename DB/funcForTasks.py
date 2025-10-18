@@ -2,8 +2,6 @@ import sqlite3
 import datetime
 
 
-
-
 def CreateTask(text, deadline, user):
     connection = None
     try:
@@ -36,7 +34,6 @@ def CreateTask(text, deadline, user):
             connection.close()
 
 
-
 def wath_tasks(task_number="все", user=None):
     connection = None
     try:
@@ -62,7 +59,6 @@ def wath_tasks(task_number="все", user=None):
     finally:
         if connection:
             connection.close()
-
 
 
 def UpdateTask(task_id, text=None, deadline=None, user=None):
@@ -95,7 +91,6 @@ def UpdateTask(task_id, text=None, deadline=None, user=None):
                     VALUES (?, ?)
                 ''', (log_message, task_id))
 
-
         print(f"Задача {task_id} успешно обновлена")
 
         connection.commit()
@@ -107,7 +102,6 @@ def UpdateTask(task_id, text=None, deadline=None, user=None):
     finally:
         if connection:
             connection.close()
-
 
 
 def CompletedTask(message, user=None):
@@ -160,3 +154,28 @@ def CompletedTask(message, user=None):
     return True
 
 
+
+def watchComleted(user):
+    connection = None
+    try:
+        connection = sqlite3.connect('my_database.db')
+        cursor = connection.cursor()
+
+        # Ищем задачи с текстом "задача была удалена или выполнена" для указанного пользователя
+        cursor.execute('SELECT * FROM tasks WHERE text = ? AND user = ? ORDER BY id',
+                      ("задача была удалена или выполнена", user))
+
+        tasks = cursor.fetchall()
+
+        # Преобразуем в список словарей для удобства
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, task)) for task in tasks]
+
+        return result
+
+    except Exception as e:
+        print(f"Ошибка: {str(e)}")
+        return []  # Возвращаем пустой список при ошибке
+    finally:
+        if connection:
+            connection.close()
