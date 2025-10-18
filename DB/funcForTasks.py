@@ -108,8 +108,6 @@ def CompletedTask(message, user=None):
     connection = None
     try:
         task_id = int(message.text.strip())
-        text = "задача была удалена или выполнена"
-        deadline = datetime.datetime.now()
 
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
@@ -120,9 +118,10 @@ def CompletedTask(message, user=None):
         if not current_data:
             raise ValueError(f"Задача с ID {task_id} не найдена")
 
-        # Используем текущие значения если новые не переданы
-        new_text = text if text is not None else current_data[0]
-        new_deadline = deadline if deadline is not None else current_data[1]
+        # Добавляем "***" по краям текущего текста вместо замены
+        current_text = current_data[0]
+        new_text = f"***{current_text}***"
+        new_deadline = datetime.datetime.now()
         new_user = user if user is not None else current_data[2]
 
         cursor.execute('''
@@ -146,7 +145,7 @@ def CompletedTask(message, user=None):
     except Exception as e:
         print(f"Ошибка при выполнении задачи: {str(e)}")
         if connection:
-            connection.rollback()  # Откатываем изменения при ошибке
+            connection.rollback()
         return False
     finally:
         if connection:
@@ -154,16 +153,15 @@ def CompletedTask(message, user=None):
     return True
 
 
-
-def watchComleted(user):
+def watchCompleted(user):
     connection = None
     try:
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
-        # Ищем задачи с текстом "задача была удалена или выполнена" для указанного пользователя
-        cursor.execute('SELECT * FROM tasks WHERE text = ? AND user = ? ORDER BY id',
-                      ("задача была удалена или выполнена", user))
+        # Ищем задачи, которые начинаются и заканчиваются на "***" для указанного пользователя
+        cursor.execute('SELECT * FROM tasks WHERE text LIKE ? AND user = ? ORDER BY id',
+                       ("***%***", user))
 
         tasks = cursor.fetchall()
 
@@ -175,7 +173,7 @@ def watchComleted(user):
 
     except Exception as e:
         print(f"Ошибка: {str(e)}")
-        return []  # Возвращаем пустой список при ошибке
+        return []
     finally:
         if connection:
             connection.close()

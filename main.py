@@ -45,16 +45,10 @@ def working(message):
         bot.register_next_step_handler(msg, FFT.CompletedTask, username)
 
     elif message.text == "завершенные":
-        comTasks = FFT.CompletedTask()
+        comTasks = FFT.watchCompleted(username)
         for task in comTasks:
-            bot.send_message(message.chat.id, task)
-
-
-
-
-
-
-
+            task_info = f"ID: {task['id']}\nТекст: {task['text']}\nДедлайн: {task['deadline']}"
+            bot.send_message(message.chat.id, task_info)
 
 
 bot.infinity_polling()

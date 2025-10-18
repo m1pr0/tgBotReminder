@@ -1,4 +1,4 @@
-import telebot
+# import telebot
 import sqlite3
 import datetime
 
@@ -45,8 +45,10 @@ def show_tasks(message, user, chat_id, bot):
         return
 
     for task in tasks:
-        bot.send_message(chat_id, f"{task['id']}: {task['text']} (до {task['deadline']})")
+        if task['text'][0] != '*':
+            bot.send_message(chat_id, f"ID: {task['id']}\nЗадание: {task['text']}\nДедлайн: {task['deadline']})")
+
 
 # просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
-# def botMes(bot, chat_id, message):
-#     bot.send_message(chat_id, str(datetime.datetime.now()) + ',' * message)
+def botMes(bot, chat_id, message):
+    bot.send_message(chat_id, str(datetime.datetime.now()) + ',' + message)
