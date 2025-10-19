@@ -1,3 +1,4 @@
+import sqlite3
 from config import TOKEN
 import telebot
 from telebot import types

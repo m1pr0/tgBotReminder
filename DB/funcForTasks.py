@@ -40,7 +40,7 @@ def wath_tasks(task_number="все", user=None):
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
-        if task_number == "все":
+        if task_number.lower() == "все" or task_number.lower() == "dct":
             cursor.execute('SELECT * FROM tasks WHERE user = ? ORDER BY id', (user,))
         else:
             cursor.execute('SELECT * FROM tasks WHERE id = ? AND user = ?', (task_number, user))

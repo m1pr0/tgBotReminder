@@ -52,3 +52,7 @@ def show_tasks(message, user, chat_id, bot):
 # просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
 def botMes(bot, chat_id, message):
     bot.send_message(chat_id, str(datetime.datetime.now()) + ',' + message)
+
+
+# функция для оправки сообщения изходя из лога в таблице logs
+# def statusByLog():
