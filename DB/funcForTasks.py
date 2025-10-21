@@ -15,7 +15,7 @@ def CreateTask(text, deadline, user):
 
         # Добавляем лог об создании
         new_id = cursor.lastrowid
-        log_message = f"Задача создана"
+        log_message = f"create"
         cursor.execute('''
                     INSERT INTO logs (log, task_id)
                     VALUES (?, ?)
@@ -85,7 +85,7 @@ def UpdateTask(task_id, text=None, deadline=None, user=None):
             ''', (new_text, new_deadline, new_user, task_id))
 
         # Добавляем лог об обновлении
-        log_message = f"Задача обновлена: текст='{new_text}', дедлайн='{new_deadline}', пользователь='{new_user}'"
+        log_message = f"update {datetime.datetime.now()}"
         cursor.execute('''
                     INSERT INTO logs (log, task_id)
                     VALUES (?, ?)
@@ -120,7 +120,7 @@ def CompletedTask(message, user=None):
 
         # Добавляем "***" по краям текущего текста вместо замены
         current_text = current_data[0]
-        new_text = f"***{current_text}***"
+        new_text = current_text
         new_deadline = datetime.datetime.now()
         new_user = user if user is not None else current_data[2]
 
@@ -159,9 +159,14 @@ def watchCompleted(user):
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
-        # Ищем задачи, которые начинаются и заканчиваются на "***" для указанного пользователя
-        cursor.execute('SELECT * FROM tasks WHERE text LIKE ? AND user = ? ORDER BY id',
-                       ("***%***", user))
+        # Ищем задачи, у которых есть лог 'Completed' для указанного пользователя
+        cursor.execute('''
+            SELECT t.* 
+            FROM tasks t
+            JOIN logs l ON t.id = l.task_id
+            WHERE l.log = ? AND t.user = ?
+            ORDER BY t.id
+        ''', ('Completed', user))
 
         tasks = cursor.fetchall()
 

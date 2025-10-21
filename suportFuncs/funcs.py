@@ -9,13 +9,26 @@ from DB import funcForTasks as FFT
 # (вся информация передана в одном сообщении) и использования  register_next_step_handler
 def before_create(message, user):
     try:
-
         task = message.text.split("|")[0].strip()
         deadline = message.text.split("|")[1].strip()
         FFT.CreateTask(task, deadline, user)
 
     except Exception as e:
         print(f"ошибка: {str(e)}")
+
+
+
+# тоже самое что и before_create только для обновления задачи
+def before_update(message, user):
+    try:
+        task_id = message.text.split("|")[0].strip()
+        task = message.text.split("|")[1].strip()
+        deadline = message.text.split("|")[2].strip()
+        FFT.UpdateTask(task_id, task, deadline, user)
+
+    except Exception as e:
+        print(f"ошибка: {str(e)}")
+
 
 
 # функция для подсчета количества записей в таблице tasks по пользователю
