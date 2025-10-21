@@ -41,15 +41,48 @@ def wath_tasks(task_number="все", user=None):
         cursor = connection.cursor()
 
         if task_number.lower() == "все" or task_number.lower() == "dct":
-            cursor.execute('SELECT * FROM tasks WHERE user = ? ORDER BY id', (user,))
+            # Выбираем только незавершенные задачи
+            cursor.execute('''
+                SELECT t.* 
+                FROM tasks t
+                WHERE t.user = ? 
+                AND t.id NOT IN (
+                    SELECT DISTINCT task_id 
+                    FROM logs 
+                    WHERE log = 'Completed'
+                )
+                ORDER BY t.id
+            ''', (user,))
         else:
-            cursor.execute('SELECT * FROM tasks WHERE id = ? AND user = ?', (task_number, user))
+            # Проверяем конкретную задачу и ее статус
+            cursor.execute('''
+                SELECT t.*,
+                       CASE 
+                         WHEN EXISTS (
+                           SELECT 1 FROM logs l 
+                           WHERE l.task_id = t.id AND l.log = 'Completed'
+                         ) THEN 1 
+                         ELSE 0 
+                       END as is_completed
+                FROM tasks t 
+                WHERE t.id = ? AND t.user = ?
+            ''', (task_number, user))
 
         tasks = cursor.fetchall()
 
         # Преобразуем в список словарей для удобства
         columns = [desc[0] for desc in cursor.description]
         result = [dict(zip(columns, task)) for task in tasks]
+
+        # Для конкретной задачи проверяем статус завершения
+        if task_number.lower() != "все" and task_number.lower() != "dct":
+            if result and result[0].get('is_completed', 0) == 1:
+                print(f"Задача {task_number} завершена")
+                return []  # Возвращаем пустой список для завершенных задач
+            elif result:
+                return result  # Возвращаем задачу если она не завершена
+            else:
+                return []  # Задача не найдена
 
         return result
 
