@@ -44,7 +44,7 @@ def show_tasks(message, user, chat_id, bot):
     task_number = message.text.strip()
 
     # Преобразуем в число, если это не "все"
-    if task_number.lower() != "все":
+    if task_number.lower() not in ['все', "ВСЕ", "Все", "dct", "Dct", "DCT"]:
         try:
             task_number = int(task_number)
         except ValueError:
@@ -59,7 +59,7 @@ def show_tasks(message, user, chat_id, bot):
 
     for task in tasks:
         if task['text'][0] != '*':
-            bot.send_message(chat_id, f"ID: {task['id']}\nЗадание: {task['text']}\nДедлайн: {task['deadline']})")
+            bot.send_message(chat_id, f"ID: {task['id']}\nЗадание: {task['text']}\nДедлайн: {task['deadline']}")
 
 
 # просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
