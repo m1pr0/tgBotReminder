@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 from DB import createDatabase
 from DB import funcForTasks as FFT
-from suportFuncs import before_create, show_tasks, before_update
+from suportFuncs import before_create, show_tasks, before_update, randomStic
 
 createDatabase()
 
@@ -36,12 +36,14 @@ def working(message):
     if message.text == "записать новый дедлайн":
         msg = bot.send_message(message.chat.id, "введите задание и дедлайн в следуюхем формате: задание|дедлайн")
         bot.register_next_step_handler(msg, before_create, username)
+        randomStic(bot, chat_id)
         # bot.send_message(message.chat.id, f"задача создана")
 
     elif message.text == "обновить дедлайн":
         msg = bot.send_message(message.chat.id,
                                "введите обновленное задание и дедлайн в следуюхем формате: номер задачи|задание|дедлайн")
         bot.register_next_step_handler(msg, before_update, username)
+        randomStic(bot, chat_id)
         # bot.send_message(message.chat.id, f"задача обновлена")
 
 
@@ -49,17 +51,20 @@ def working(message):
         msg = bot.send_message(message.chat.id,
                                "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
         bot.register_next_step_handler(msg, show_tasks, username, chat_id, bot)
+        randomStic(bot, chat_id)
 
 
     elif message.text == "завершить дедлайн":
         msg = bot.send_message(message.chat.id, "введите номер задачи, которую нужно завершить")
         bot.register_next_step_handler(msg, FFT.CompletedTask, username)
+        randomStic(bot, chat_id)
 
     elif message.text == "завершенные":
         comTasks = FFT.watchCompleted(username)
         for task in comTasks:
             task_info = f"ID: {task['id']}\nТекст: {task['text']}\nДедлайн: {task['deadline']}"
             bot.send_message(message.chat.id, task_info)
+        randomStic(bot, chat_id)
 
 
 bot.infinity_polling()

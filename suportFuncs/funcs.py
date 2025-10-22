@@ -1,7 +1,7 @@
 # import telebot
+import random
 import sqlite3
 import datetime
-
 from DB import funcForTasks as FFT
 
 
@@ -65,6 +65,17 @@ def show_tasks(message, user, chat_id, bot):
 # просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
 def botMes(bot, chat_id, message):
     bot.send_message(chat_id, str(datetime.datetime.now()) + ',' + message)
+
+
+
+def randomStic(bot, chat_id):
+    stickerPull = ["CAACAgQAAxkBAAETVxho-UxSImgVGwWD-tneI0wo3HGI5AAC9A4AAqbxcR70SZSRrqM8yDYE",
+                   "CAACAgQAAxkBAAETVxpo-Ux8S7QrcS5m0OOaeOJ3HDnQ3AACIA8AAqbxcR6lYs4uCYaxhTYE",
+                   "CAACAgQAAxkBAAETVxxo-UyTyXDyPBvIyP4HMxDfDlVkRQACBhYAAqbxcR4lN_xMd39fmTYE",
+                   "CAACAgQAAxkBAAETVx5o-Uyl7X8GA-hH3xno3texusHVJwACDA8AAqbxcR4C181RIl_-BDYE",
+                   "CAACAgQAAxkBAAETVyBo-Uy0_OhdfJDkrBpZUhDRaGwczQACEw8AAqbxcR6ep3Xwe2oHejYE"]
+    random_sticker = random.choice(stickerPull)
+    bot.send_sticker(chat_id, random_sticker)
 
 
 # функция для оправки сообщения изходя из лога в таблице logs
