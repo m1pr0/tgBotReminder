@@ -1,5 +1,6 @@
 import sqlite3
 import datetime
+from validationFunctions import *
 
 
 def CreateTask(text, deadline, user):
@@ -35,12 +36,20 @@ def CreateTask(text, deadline, user):
 
 
 def wath_tasks(task_number="все", user=None):
+    """
+    Безопасный просмотр задач
+    """
+    # ВАЛИДАЦИЯ ВХОДНЫХ ДАННЫХ
+    validated_task_number = validate_task_input(task_number)
+    if validated_task_number is None:
+        return []  # Невалидный ввод - возвращаем пустой список
+
     connection = None
     try:
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
-        if task_number.lower() == "все" or task_number.lower() == "dct":
+        if validated_task_number == "все":
             # Выбираем только незавершенные задачи
             cursor.execute('''
                 SELECT t.* 
@@ -54,7 +63,7 @@ def wath_tasks(task_number="все", user=None):
                 ORDER BY t.id
             ''', (user,))
         else:
-            # Проверяем конкретную задачу и ее статус
+            # validated_task_number - ГАРАНТИРОВАННО число или "все"
             cursor.execute('''
                 SELECT t.*,
                        CASE 
@@ -66,7 +75,7 @@ def wath_tasks(task_number="все", user=None):
                        END as is_completed
                 FROM tasks t 
                 WHERE t.id = ? AND t.user = ?
-            ''', (task_number, user))
+            ''', (validated_task_number, user))
 
         tasks = cursor.fetchall()
 
@@ -75,9 +84,9 @@ def wath_tasks(task_number="все", user=None):
         result = [dict(zip(columns, task)) for task in tasks]
 
         # Для конкретной задачи проверяем статус завершения
-        if task_number.lower() != "все" and task_number.lower() != "dct":
+        if validated_task_number != "все":
             if result and result[0].get('is_completed', 0) == 1:
-                print(f"Задача {task_number} завершена")
+                print(f"Задача {validated_task_number} завершена")
                 return []  # Возвращаем пустой список для завершенных задач
             elif result:
                 return result  # Возвращаем задачу если она не завершена
@@ -94,44 +103,62 @@ def wath_tasks(task_number="все", user=None):
             connection.close()
 
 
+@validate_task_access
 def UpdateTask(task_id, text=None, deadline=None, user=None):
+    # Дополнительная проверка на сервере
+    if not isinstance(task_id, int):
+        raise TypeError("task_id должен быть целым числом")
+
     connection = None
     try:
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
-        cursor.execute('SELECT text, deadline, user FROM tasks WHERE id = ?', (task_id,))
-        current_data = cursor.fetchone()
+        # Сначала проверяем существование задачи
+        cursor.execute('SELECT user FROM tasks WHERE id = ?', (task_id,))
+        task = cursor.fetchone()
 
-        if not current_data:
+        if not task:
             raise ValueError(f"Задача с ID {task_id} не найдена")
+
+        # Проверяем права доступа (двойная проверка)
+        if task[0] != user:
+            raise PermissionError("Доступ запрещен")
+
+        # Получаем текущие данные
+        cursor.execute('SELECT text, deadline FROM tasks WHERE id = ?', (task_id,))
+        current_data = cursor.fetchone()
 
         # Используем текущие значения если новые не переданы
         new_text = text if text is not None else current_data[0]
         new_deadline = deadline if deadline is not None else current_data[1]
-        new_user = user if user is not None else current_data[2]
 
+        # Выполняем обновление
         cursor.execute('''
-                UPDATE tasks 
-                SET text = ?, deadline = ?, user = ?
-                WHERE id = ?
-            ''', (new_text, new_deadline, new_user, task_id))
+            UPDATE tasks 
+            SET text = ?, deadline = ?
+            WHERE id = ?
+        ''', (new_text, new_deadline, task_id))
 
-        # Добавляем лог об обновлении
-        log_message = f"update {datetime.datetime.now()}"
+        # Логируем действие
+        log_message = f"update"
         cursor.execute('''
-                    INSERT INTO logs (log, task_id)
-                    VALUES (?, ?)
-                ''', (log_message, task_id))
-
-        print(f"Задача {task_id} успешно обновлена")
+            INSERT INTO logs (log, task_id)
+            VALUES (?, ?)
+        ''', (log_message, task_id))
 
         connection.commit()
+        print(f"✅ Задача {task_id} успешно обновлена")
+        return True
 
-
+    except (ValueError, PermissionError, TypeError) as e:
+        print(f"❌ Ошибка валидации: {str(e)}")
+        return False
     except Exception as e:
-        print(f"ошибка: {str(e)}")
-
+        print(f"❌ Ошибка БД: {str(e)}")
+        if connection:
+            connection.rollback()
+        return False
     finally:
         if connection:
             connection.close()
@@ -140,18 +167,45 @@ def UpdateTask(task_id, text=None, deadline=None, user=None):
 def CompletedTask(message, user=None):
     connection = None
     try:
-        task_id = int(message.text.strip())
+        # 1. ВАЛИДАЦИЯ: Извлекаем task_id из message
+        if not hasattr(message, 'text') or not message.text:
+            print("❌ Не получен текст сообщения")
+            return False
 
+        task_id_str = message.text.strip()
+        if not task_id_str:
+            print("❌ Пустой ввод")
+            return False
+
+        # 2. ВАЛИДАЦИЯ: Проверяем, что это число
+        if not task_id_str.isdigit():
+            print("❌ ID задачи должен быть числом")
+            return False
+
+        # 3. ВАЛИДАЦИЯ: Преобразуем и проверяем диапазон
+        task_id = int(task_id_str)
+        if task_id <= 0 or task_id > 1_000_000:
+            print("❌ Некорректный ID задачи")
+            return False
+
+        # 4. ВАЛИДАЦИЯ: Проверяем права доступа
+        if not task_belongs_to_user(task_id, user):
+            print("❌ Доступ к задаче запрещен")
+            return False
+
+        # 5. ОСНОВНАЯ ЛОГИКА (после всех проверок)
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
+        # Проверяем существование задачи
         cursor.execute('SELECT text, deadline, user FROM tasks WHERE id = ?', (task_id,))
         current_data = cursor.fetchone()
 
         if not current_data:
-            raise ValueError(f"Задача с ID {task_id} не найдена")
+            print(f"❌ Задача с ID {task_id} не найдена")
+            return False
 
-        # Добавляем "***" по краям текущего текста вместо замены
+        # Обновляем задачу
         current_text = current_data[0]
         new_text = current_text
         new_deadline = datetime.datetime.now()
@@ -163,6 +217,7 @@ def CompletedTask(message, user=None):
             WHERE id = ?
         ''', (new_text, new_deadline, new_user, task_id))
 
+        # Добавляем лог
         log_message = 'Completed'
         cursor.execute('''
             INSERT INTO logs (log, task_id)
@@ -170,20 +225,17 @@ def CompletedTask(message, user=None):
         ''', (log_message, task_id))
 
         connection.commit()
-        print(f"Задача {task_id} отмечена как выполненная")
+        print(f"✅ Задача {task_id} отмечена как выполненная")
+        return True
 
-    except ValueError as e:
-        print(f"Ошибка валидации: {str(e)}")
-        return False
     except Exception as e:
-        print(f"Ошибка при выполнении задачи: {str(e)}")
+        print(f"❌ Ошибка при выполнении задачи: {str(e)}")
         if connection:
             connection.rollback()
         return False
     finally:
         if connection:
             connection.close()
-    return True
 
 
 def watchCompleted(user):

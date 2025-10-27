@@ -1,21 +1,22 @@
-import sqlite3
-from config import TOKEN
 import telebot
 from telebot import types
+
 from DB import createDatabase
 from DB import funcForTasks as FFT
+from config import TOKEN
 from suportFuncs import before_create, show_tasks, before_update, randomStic
 
 createDatabase()
 
 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-item1 = types.KeyboardButton("записать новый дедлайн")
-item5 = types.KeyboardButton("обновить дедлайн")
-item2 = types.KeyboardButton("посмотреть мои дедлайны")
-item3 = types.KeyboardButton("завершить дедлайн")
-item4 = types.KeyboardButton("завершенные")
-
-markup.add(item1, item5, item2, item3, item4)
+buttons = [
+    "📝 Новая задача",
+    "✏️ Обновить",
+    "👀 Мои задачи",
+    "✅ Завершить",
+    "📋 Завершенные"
+]
+markup.add(*buttons)
 
 API_TOKEN = TOKEN
 
@@ -33,13 +34,13 @@ def working(message):
     username = message.from_user.username
     chat_id = message.chat.id
 
-    if message.text == "записать новый дедлайн":
+    if message.text == "📝 Новая задача":
         msg = bot.send_message(message.chat.id, "введите задание и дедлайн в следуюхем формате: задание|дедлайн")
         bot.register_next_step_handler(msg, before_create, username)
         randomStic(bot, chat_id)
         # bot.send_message(message.chat.id, f"задача создана")
 
-    elif message.text == "обновить дедлайн":
+    elif message.text == "✏️ Обновить":
         msg = bot.send_message(message.chat.id,
                                "введите обновленное задание и дедлайн в следуюхем формате: номер задачи|задание|дедлайн")
         bot.register_next_step_handler(msg, before_update, username)
@@ -47,19 +48,19 @@ def working(message):
         # bot.send_message(message.chat.id, f"задача обновлена")
 
 
-    elif message.text == "посмотреть мои дедлайны":
+    elif message.text == "👀 Мои задачи":
         msg = bot.send_message(message.chat.id,
                                "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
         bot.register_next_step_handler(msg, show_tasks, username, chat_id, bot)
         randomStic(bot, chat_id)
 
 
-    elif message.text == "завершить дедлайн":
+    elif message.text == "✅ Завершить":
         msg = bot.send_message(message.chat.id, "введите номер задачи, которую нужно завершить")
         bot.register_next_step_handler(msg, FFT.CompletedTask, username)
         randomStic(bot, chat_id)
 
-    elif message.text == "завершенные":
+    elif message.text == "📋 Завершенные":
         comTasks = FFT.watchCompleted(username)
         for task in comTasks:
             task_info = f"ID: {task['id']}\nТекст: {task['text']}\nДедлайн: {task['deadline']}"
