@@ -56,8 +56,10 @@ def validate_task_access(func):
 
     return wrapper
 
+
 def task_belongs_to_user(task_id, username):
     if not isinstance(task_id, int):
+        print(f"❌ task_id не является числом: {type(task_id)} = {task_id}")
         return False
 
     connection = None
@@ -65,16 +67,27 @@ def task_belongs_to_user(task_id, username):
         connection = sqlite3.connect('my_database.db')
         cursor = connection.cursor()
 
+        print(f"🔍 SQL запрос: SELECT user FROM tasks WHERE id = {task_id}")
         cursor.execute(
             'SELECT user FROM tasks WHERE id = ?',
             (task_id,)
         )
 
         result = cursor.fetchone()
-        return result is not None and result[0] == username
+        print(f"🔍 Результат запроса: {result}")
+
+        if result is None:
+            print(f"❌ Задача с ID {task_id} не найдена")
+            return False
+
+        task_user = result[0]
+        print(f"🔍 Владелец задачи: '{task_user}', текущий пользователь: '{username}'")
+        print(f"🔍 Сравнение: {task_user == username}")
+
+        return task_user == username
 
     except Exception as e:
-        print(f"Ошибка проверки прав доступа: {e}")
+        print(f"❌ Ошибка проверки прав доступа: {e}")
         return False
     finally:
         if connection:

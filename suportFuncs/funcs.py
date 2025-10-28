@@ -19,7 +19,9 @@ def before_create(message, user):
 
 
 # то же самое, что и before_create только для обновления задачи
-@validate_task_access
+'''@validate_task_access'''
+
+
 def before_update(message, user):
     try:
         # 1. Проверка формата
@@ -52,8 +54,26 @@ def before_update(message, user):
         if not deadline:
             raise ValueError("❌ Дедлайн не может быть пустым")
 
+        # ОТЛАДОЧНАЯ ИНФОРМАЦИЯ
+        print(f"🔍 Проверка доступа: task_id={task_id}, user={user}")
+
         # 6. Проверка прав доступа
-        if not task_belongs_to_user(task_id, user):
+        belongs = task_belongs_to_user(task_id, user)
+        print(f"🔍 Результат проверки: {belongs}")
+
+        if not belongs:
+            # Дополнительная диагностика
+            connection = sqlite3.connect('my_database.db')
+            cursor = connection.cursor()
+            cursor.execute('SELECT id, user FROM tasks WHERE id = ?', (task_id,))
+            task_info = cursor.fetchone()
+            connection.close()
+
+            if task_info:
+                print(f"🔍 Задача найдена: id={task_info[0]}, user={task_info[1]}")
+            else:
+                print(f"🔍 Задача с ID {task_id} не найдена в БД")
+
             raise PermissionError("❌ У вас нет прав на эту задачу")
 
         # 7. Только теперь выполняем операцию
