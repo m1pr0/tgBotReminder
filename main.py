@@ -4,7 +4,7 @@ from telebot import types
 from DB import createDatabase
 from DB import funcForTasks as FFT
 from config import TOKEN
-from suportFuncs import before_create, show_tasks, before_update, randomStic
+from suportFuncs import before_create, show_tasks, before_update, randomStic, actual_tasks
 
 createDatabase()
 
@@ -49,8 +49,8 @@ def working(message):
 
 
     elif message.text == "👀 Мои задачи":
-        msg = bot.send_message(message.chat.id,
-                               "введите номер задачи, если хотите посмотреть все задачи, введите: 'все'")
+        tasks = actual_tasks(username)
+        msg = bot.send_message(message.chat.id,f"введите номер задачи, если хотите посмотреть все задачи, введите: 'все'\n\nактуальные задачи: {tasks}")
         bot.register_next_step_handler(msg, show_tasks, username, chat_id, bot)
         randomStic(bot, chat_id)
 

@@ -116,3 +116,39 @@ def randomStic(bot, chat_id):
                    "CAACAgQAAxkBAAETVyBo-Uy0_OhdfJDkrBpZUhDRaGwczQACEw8AAqbxcR6ep3Xwe2oHejYE"]
     random_sticker = random.choice(stickerPull)
     bot.send_sticker(chat_id, random_sticker)
+
+
+# Возвращает список актуальных задач пользователя (задачи без статуса 'Completed' в logs)
+def actual_tasks(user):
+    connection = None
+    try:
+        connection = sqlite3.connect('my_database.db')
+        cursor = connection.cursor()
+
+        # Выбираем только незавершенные задачи пользователя
+        cursor.execute('''
+            SELECT t.* 
+            FROM tasks t
+            WHERE t.user = ? 
+            AND t.id NOT IN (
+                SELECT DISTINCT task_id 
+                FROM logs 
+                WHERE log = 'Completed'
+            )
+            ORDER BY t.id
+        ''', (user,))
+
+        tasks = cursor.fetchall()
+
+        # Преобразуем в список словарей для удобства
+        columns = [desc[0] for desc in cursor.description]
+        result = [dict(zip(columns, task)) for task in tasks]
+
+        return result
+
+    except Exception as e:
+        print(f"❌ Ошибка получения актуальных задач: {str(e)}")
+        return []  # Возвращаем пустой список при ошибке
+    finally:
+        if connection:
+            connection.close()
