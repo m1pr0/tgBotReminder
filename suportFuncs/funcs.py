@@ -4,6 +4,7 @@ import sqlite3
 import datetime
 from DB import funcForTasks as FFT
 from validationFunctions import *
+from config import stickers
 
 
 # функция нужна в момент создания задания для обработки сообщения пользователя
@@ -20,8 +21,6 @@ def before_create(message, user):
 
 # то же самое, что и before_create только для обновления задачи
 '''@validate_task_access'''
-
-
 def before_update(message, user):
     try:
         # 1. Проверка формата
@@ -129,11 +128,7 @@ def botMes(bot, chat_id, message):
 
 
 def randomStic(bot, chat_id):
-    stickerPull = ["CAACAgQAAxkBAAETVxho-UxSImgVGwWD-tneI0wo3HGI5AAC9A4AAqbxcR70SZSRrqM8yDYE",
-                   "CAACAgQAAxkBAAETVxpo-Ux8S7QrcS5m0OOaeOJ3HDnQ3AACIA8AAqbxcR6lYs4uCYaxhTYE",
-                   "CAACAgQAAxkBAAETVxxo-UyTyXDyPBvIyP4HMxDfDlVkRQACBhYAAqbxcR4lN_xMd39fmTYE",
-                   "CAACAgQAAxkBAAETVx5o-Uyl7X8GA-hH3xno3texusHVJwACDA8AAqbxcR4C181RIl_-BDYE",
-                   "CAACAgQAAxkBAAETVyBo-Uy0_OhdfJDkrBpZUhDRaGwczQACEw8AAqbxcR6ep3Xwe2oHejYE"]
+    stickerPull = stickers
     random_sticker = random.choice(stickerPull)
     bot.send_sticker(chat_id, random_sticker)
 

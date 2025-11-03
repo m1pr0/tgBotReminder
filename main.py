@@ -49,7 +49,7 @@ def working(message):
 
 
     elif message.text == "👀 Мои задачи":
-        tasks = actual_tasks(username)
+        tasks = [x["id"] for x in actual_tasks(username)]
         msg = bot.send_message(message.chat.id,f"введите номер задачи, если хотите посмотреть все задачи, введите: 'все'\n\nактуальные задачи: {tasks}")
         bot.register_next_step_handler(msg, show_tasks, username, chat_id, bot)
         randomStic(bot, chat_id)
