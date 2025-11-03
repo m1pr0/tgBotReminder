@@ -103,7 +103,6 @@ def wath_tasks(task_number="все", user=None):
             connection.close()
 
 
-'''@validate_task_access'''
 def UpdateTask(task_id, text=None, deadline=None, user=None):
     # Дополнительная проверка на сервере
     if not isinstance(task_id, int):

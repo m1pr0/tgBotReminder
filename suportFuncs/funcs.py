@@ -1,4 +1,3 @@
-# import telebot
 import random
 import sqlite3
 import datetime
@@ -20,7 +19,6 @@ def before_create(message, user):
 
 
 # то же самое, что и before_create только для обновления задачи
-'''@validate_task_access'''
 def before_update(message, user):
     try:
         # 1. Проверка формата
@@ -120,11 +118,6 @@ def show_tasks(message, user, chat_id, bot):
     for task in tasks:
         if task['text'][0] != '*':
             bot.send_message(chat_id, f"ID: {task['id']}\nЗадание: {task['text']}\nДедлайн: {task['deadline']}")
-
-
-# просто функция для вывода сообщений, скорее всего будет использоваться для вывода ошибок
-def botMes(bot, chat_id, message):
-    bot.send_message(chat_id, str(datetime.datetime.now()) + ',' + message)
 
 
 def randomStic(bot, chat_id):
